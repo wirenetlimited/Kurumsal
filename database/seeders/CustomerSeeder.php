@@ -1,0 +1,261 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Customer;
+use Carbon\Carbon;
+
+class CustomerSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // Bireysel Müşteriler (10 adet)
+        $individualCustomers = [
+            [
+                'name' => 'Ahmet Yılmaz',
+                'email' => 'ahmet.yilmaz@email.com',
+                'phone' => '0532 123 45 67',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Atatürk Mahallesi, Cumhuriyet Caddesi No:15, Kadıköy/İstanbul',
+                'city' => 'İstanbul',
+                'country' => 'Türkiye',
+                'zip' => '34700',
+                'notes' => 'Web tasarım hizmetleri almak istiyor. Responsive tasarım öncelikli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Ayşe Demir',
+                'email' => 'ayse.demir@email.com',
+                'phone' => '0533 234 56 78',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Gazi Mahallesi, İstiklal Sokak No:8, Çankaya/Ankara',
+                'city' => 'Ankara',
+                'country' => 'Türkiye',
+                'zip' => '06690',
+                'notes' => 'E-ticaret sitesi kurulumu. Ödeme sistemi entegrasyonu gerekli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Mehmet Kaya',
+                'email' => 'mehmet.kaya@email.com',
+                'phone' => '0534 345 67 89',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Alsancak Mahallesi, Kıbrıs Şehitleri Caddesi No:25, Konak/İzmir',
+                'city' => 'İzmir',
+                'country' => 'Türkiye',
+                'zip' => '35220',
+                'notes' => 'Kişisel blog sitesi. SEO optimizasyonu önemli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Fatma Özkan',
+                'email' => 'fatma.ozkan@email.com',
+                'phone' => '0535 456 78 90',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Nilüfer Mahallesi, FSM Bulvarı No:12, Nilüfer/Bursa',
+                'city' => 'Bursa',
+                'country' => 'Türkiye',
+                'zip' => '16110',
+                'notes' => 'Online eğitim platformu. Video streaming özelliği gerekli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Ali Çelik',
+                'email' => 'ali.celik@email.com',
+                'phone' => '0536 567 89 01',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Konyaaltı Mahallesi, Atatürk Caddesi No:18, Konyaaltı/Antalya',
+                'city' => 'Antalya',
+                'country' => 'Türkiye',
+                'zip' => '07070',
+                'notes' => 'Turizm rehberi sitesi. Çok dilli destek gerekli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Zeynep Arslan',
+                'email' => 'zeynep.arslan@email.com',
+                'phone' => '0537 678 90 12',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Sakarya Mahallesi, İnönü Caddesi No:22, Tepebaşı/Eskişehir',
+                'city' => 'Eskişehir',
+                'country' => 'Türkiye',
+                'zip' => '26040',
+                'notes' => 'El sanatları satış sitesi. Stok takip sistemi gerekli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Mustafa Şahin',
+                'email' => 'mustafa.sahin@email.com',
+                'phone' => '0538 789 01 23',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Karşıyaka Mahallesi, Atatürk Caddesi No:30, Karşıyaka/İzmir',
+                'city' => 'İzmir',
+                'country' => 'Türkiye',
+                'zip' => '26040',
+                'notes' => 'Fitness blog sitesi. Üyelik sistemi ve egzersiz videoları.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Elif Yıldız',
+                'email' => 'elif.yildiz@email.com',
+                'phone' => '0539 890 12 34',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Çankaya Mahallesi, Kızılay Meydanı No:5, Çankaya/Ankara',
+                'city' => 'Ankara',
+                'country' => 'Türkiye',
+                'zip' => '06420',
+                'notes' => 'Yemek tarifleri sitesi. Kullanıcı yorumları ve puanlama sistemi.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Hasan Koç',
+                'email' => 'hasan.koc@email.com',
+                'phone' => '0531 901 23 45',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Beşiktaş Mahallesi, Barbaros Bulvarı No:28, Beşiktaş/İstanbul',
+                'city' => 'İstanbul',
+                'country' => 'Türkiye',
+                'zip' => '34353',
+                'notes' => 'Teknoloji haber sitesi. RSS feed ve sosyal medya entegrasyonu.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Selin Öztürk',
+                'email' => 'selin.ozturk@email.com',
+                'phone' => '0530 012 34 56',
+                'customer_type' => 'individual',
+                'tax_number' => null,
+                'address' => 'Bornova Mahallesi, Ege Üniversitesi Caddesi No:35, Bornova/İzmir',
+                'city' => 'İzmir',
+                'country' => 'Türkiye',
+                'zip' => '35040',
+                'notes' => 'Edebiyat sitesi. Kitap önerileri ve yazar profilleri.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+        ];
+
+        // Kurumsal Müşteriler (5 adet)
+        $corporateCustomers = [
+            [
+                'name' => 'Teknoloji Çözümleri A.Ş.',
+                'email' => 'info@teknoloji.com.tr',
+                'phone' => '0212 555 01 01',
+                'customer_type' => 'corporate',
+                'tax_number' => '1234567890',
+                'address' => 'Teknoloji Vadisi, İnovasyon Caddesi No:100, Kadıköy/İstanbul',
+                'city' => 'İstanbul',
+                'country' => 'Türkiye',
+                'zip' => '34700',
+                'notes' => 'Kurumsal web sitesi yenileme. Çok dilli destek ve CRM entegrasyonu gerekli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Eğitim Kurumları Grubu',
+                'email' => 'iletisim@egitim.com.tr',
+                'phone' => '0312 555 02 02',
+                'customer_type' => 'corporate',
+                'tax_number' => '2345678901',
+                'address' => 'Eğitim Kampüsü, Bilim Caddesi No:200, Çankaya/Ankara',
+                'city' => 'Ankara',
+                'country' => 'Türkiye',
+                'zip' => '06690',
+                'notes' => 'E-öğrenme platformu geliştirme. Öğrenci takip sistemi ve sınav modülü.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Dijital Ticaret Ltd. Şti.',
+                'email' => 'info@ticaret.com.tr',
+                'phone' => '0232 555 03 03',
+                'customer_type' => 'corporate',
+                'tax_number' => '3456789012',
+                'address' => 'Ticaret Merkezi, İş Caddesi No:150, Konak/İzmir',
+                'city' => 'İzmir',
+                'country' => 'Türkiye',
+                'zip' => '35220',
+                'notes' => 'B2B e-ticaret platformu. Tedarikçi yönetimi ve stok entegrasyonu.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Sağlık Hizmetleri A.Ş.',
+                'email' => 'iletisim@saglik.com.tr',
+                'phone' => '0224 555 04 04',
+                'customer_type' => 'corporate',
+                'tax_number' => '4567890123',
+                'address' => 'Sağlık Kampüsü, Tıp Caddesi No:300, Nilüfer/Bursa',
+                'city' => 'Bursa',
+                'country' => 'Türkiye',
+                'zip' => '16110',
+                'notes' => 'Hastane yönetim sistemi. Randevu sistemi ve hasta kayıt modülü.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'name' => 'Finans Teknolojileri Ltd. Şti.',
+                'email' => 'info@finans.com.tr',
+                'phone' => '0242 555 05 05',
+                'customer_type' => 'corporate',
+                'tax_number' => '5678901234',
+                'address' => 'Finans Merkezi, Banka Caddesi No:250, Konyaaltı/Antalya',
+                'city' => 'Antalya',
+                'country' => 'Türkiye',
+                'zip' => '07070',
+                'notes' => 'Finansal uygulama geliştirme. Güvenlik ve şifreleme öncelikli.',
+                'is_active' => true,
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ],
+        ];
+
+        // Tüm müşterileri ekle
+        $allCustomers = array_merge($individualCustomers, $corporateCustomers);
+        
+        foreach ($allCustomers as $customerData) {
+            Customer::create($customerData);
+        }
+
+        $this->command->info('15 müşteri başarıyla eklendi:');
+        $this->command->info('- 10 Bireysel müşteri');
+        $this->command->info('- 5 Kurumsal müşteri');
+    }
+}
