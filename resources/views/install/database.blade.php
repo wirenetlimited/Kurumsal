@@ -15,6 +15,19 @@
                 <p class="text-gray-600">Kurulum Sihirbazı - Adım 2/4</p>
             </div>
 
+            <!-- Debug Information -->
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 class="font-medium text-blue-900 mb-2">🔍 Debug Bilgileri</h3>
+                <div class="text-sm text-blue-800 space-y-1">
+                    <div><strong>PHP Sürümü:</strong> {{ phpversion() }}</div>
+                    <div><strong>MySQL Extension:</strong> {{ extension_loaded('mysqli') ? '✅ Yüklü' : '❌ Yüklü Değil' }}</div>
+                    <div><strong>PDO Extension:</strong> {{ extension_loaded('pdo') ? '✅ Yüklü' : '❌ Yüklü Değil' }}</div>
+                    <div><strong>PDO MySQL:</strong> {{ extension_loaded('pdo_mysql') ? '✅ Yüklü' : '❌ Yüklü Değil' }}</div>
+                    <div><strong>.env Dosyası:</strong> {{ file_exists(base_path('.env')) ? '✅ Mevcut' : '❌ Yok' }}</div>
+                    <div><strong>Storage Yazılabilir:</strong> {{ is_writable(storage_path()) ? '✅ Evet' : '❌ Hayır' }}</div>
+                </div>
+            </div>
+
             <!-- Progress Bar -->
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-2">
@@ -23,6 +36,17 @@
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2">
                     <div class="bg-blue-600 h-2 rounded-full" style="width: 50%"></div>
+                </div>
+            </div>
+
+            <!-- Geri Dönüş Butonları -->
+            <div class="mb-6 flex justify-between">
+                <a href="{{ route('install.back-to-index') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600 transition-colors">
+                    ← Geri (Sistem Gereksinimleri)
+                </a>
+                <div class="text-sm text-gray-500">
+                    Adım 2/4
                 </div>
             </div>
 
@@ -110,8 +134,8 @@
                         <label for="db_password" class="block text-sm font-medium text-gray-700">Şifre</label>
                         <input type="password" name="db_password" id="db_password" value="{{ old('db_password') }}" 
                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" 
-                               placeholder="veritabani_sifresi" required>
-                        <p class="mt-1 text-sm text-gray-500">Veritabanı kullanıcısının şifresi</p>
+                               placeholder="veritabani_sifresi (opsiyonel)">
+                        <p class="mt-1 text-sm text-gray-500">Veritabanı kullanıcısının şifresi (boş bırakılabilir)</p>
                     </div>
 
                     <!-- Instructions -->

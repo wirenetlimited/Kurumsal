@@ -94,37 +94,144 @@
                     </div>
                 </div>
 
+                <!-- Debug Information -->
+                <div class="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                    <h3 class="font-medium text-blue-900 mb-3">🔍 Debug Bilgileri</h3>
+                    <div class="text-sm text-blue-800 space-y-1">
+                        <div><strong>Mevcut Dizin:</strong> {{ getcwd() }}</div>
+                        <div><strong>Base Path:</strong> {{ base_path() }}</div>
+                        <div><strong>Storage Path:</strong> {{ storage_path() }}</div>
+                        <div><strong>PHP OS:</strong> {{ PHP_OS_FAMILY }}</div>
+                    </div>
+                </div>
+
                 <!-- File Permissions -->
                 <div class="border rounded-lg p-4">
                     <h3 class="font-medium text-gray-900 mb-3">Dosya İzinleri</h3>
-                    <div class="space-y-2">
+                    <div class="space-y-3">
                         @php
                             $requiredPaths = [
-                                'storage/' => 'storage/',
-                                'bootstrap/cache/' => 'bootstrap/cache/',
-                                '.env' => '.env'
+                                'storage/' => ['path' => 'storage/', 'required' => '775', 'description' => 'Laravel cache ve log dosyaları için'],
+                                'bootstrap/cache/' => ['path' => 'bootstrap/cache/', 'required' => '775', 'description' => 'Laravel bootstrap cache için'],
+                                '.env' => ['path' => '.env', 'required' => '644', 'description' => 'Uygulama yapılandırması için']
                             ];
+                            
                             $allPermissionsOk = true;
                         @endphp
-                        @foreach($requiredPaths as $path => $displayName)
+                        @foreach($requiredPaths as $displayName => $config)
                             @php
-                                $writable = is_writable($path);
+                                $path = $config['path'];
+                                $required = $config['required'];
+                                $description = $config['description'];
+                                
+                                // Hem göreli hem mutlak yol ile kontrol et
+                                $relativePath = $path;
+                                $absolutePath = base_path($path);
+                                
+                                $writable = is_writable($relativePath) || is_writable($absolutePath);
+                                $exists = file_exists($relativePath) || is_dir($relativePath) || file_exists($absolutePath) || is_dir($absolutePath);
+                                
+                                // Hangi yolun çalıştığını belirle
+                                $workingPath = '';
+                                if (file_exists($relativePath) || is_dir($relativePath)) {
+                                    $workingPath = $relativePath;
+                                } elseif (file_exists($absolutePath) || is_dir($absolutePath)) {
+                                    $workingPath = $absolutePath;
+                                }
+                                
+                                // Mevcut izinleri al (Windows uyumlu)
+                                if ($exists) {
+                                    if (PHP_OS_FAMILY === 'Windows') {
+                                        // Windows'ta farklı kontrol
+                                        $currentPerms = $writable ? 'Yazılabilir' : 'Salt Okunur';
+                                    } else {
+                                        $currentPerms = substr(sprintf('%o', fileperms($workingPath ?: $path)), -3);
+                                    }
+                                } else {
+                                    $currentPerms = 'Dosya/Klasör Yok';
+                                }
+                                
                                 if (!$writable) $allPermissionsOk = false;
                             @endphp
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-600">{{ $displayName }}</span>
-                                @if($writable)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </span>
+                            <div class="border rounded-lg p-3 {{ $writable ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200' }}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="font-medium text-gray-900">{{ $displayName }}</span>
+                                        @if($writable)
+                                            <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                OK
+                                            </span>
+                                        @else
+                                            <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                HATA
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                <div class="text-sm text-gray-600 mb-2">{{ $description }}</div>
+                                
+                                <!-- Debug Path Info -->
+                                <div class="text-xs text-gray-500 mb-2 bg-gray-50 p-2 rounded">
+                                    <div><strong>Göreli Yol:</strong> {{ $relativePath }} 
+                                        @if(file_exists($relativePath) || is_dir($relativePath))
+                                            <span class="text-green-600">✅ VAR</span>
+                                        @else
+                                            <span class="text-red-600">❌ YOK</span>
+                                        @endif
+                                    </div>
+                                    <div><strong>Mutlak Yol:</strong> {{ $absolutePath }}
+                                        @if(file_exists($absolutePath) || is_dir($absolutePath))
+                                            <span class="text-green-600">✅ VAR</span>
+                                        @else
+                                            <span class="text-red-600">❌ YOK</span>
+                                        @endif
+                                    </div>
+                                    @if($workingPath)
+                                        <div><strong>Çalışan Yol:</strong> {{ $workingPath }} <span class="text-blue-600">✅</span></div>
+                                    @endif
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                        <span class="font-medium text-gray-700">Mevcut İzin:</span>
+                                        <span class="ml-1 font-mono {{ $writable ? 'text-green-600' : 'text-red-600' }}">{{ $currentPerms }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-medium text-gray-700">Gerekli İzin:</span>
+                                        <span class="ml-1 font-mono text-blue-600">{{ $required }}</span>
+                                    </div>
+                                </div>
+                                
+                                @if(!$writable)
+                                    <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                                        <div class="font-medium text-yellow-800 mb-1">Çözüm:</div>
+                                        <div class="text-yellow-700">
+                                            <div class="mb-2">
+                                                <strong>Linux/Unix:</strong><br>
+                                                @if($displayName === '.env')
+                                                    <code class="bg-yellow-100 px-1 rounded">chmod 644 .env</code>
+                                                @else
+                                                    <code class="bg-yellow-100 px-1 rounded">chmod -R 775 {{ $path }}</code>
+                                                @endif
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>cPanel:</strong><br>
+                                                File Manager → sağ tık → "Permissions" → {{ $required }}
+                                            </div>
+                                            <div>
+                                                <strong>Plesk:</strong><br>
+                                                File Manager → sağ tık → "Change Permissions" → {{ $required }}<br>
+                                                <em class="text-xs">veya SSH: <code class="bg-yellow-100 px-1 rounded">chmod -R {{ $required }} {{ $path }}</code></em>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach
@@ -134,8 +241,15 @@
 
             <!-- Navigation -->
             <div class="flex justify-between mt-8">
-                <div></div>
                 <div>
+                    <button onclick="location.reload()" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        İzinleri Yenile
+                    </button>
+                </div>
+                <div class="flex space-x-3">
                     @php
                         $canProceed = $phpVersionOk && $allExtensionsOk && $allPermissionsOk;
                     @endphp
@@ -147,6 +261,13 @@
                             </svg>
                         </a>
                     @else
+                        <!-- BYPASS BUTTON - Plesk için -->
+                        <a href="{{ route('install.database') }}?bypass=1" class="inline-flex items-center px-4 py-2 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            Plesk Bypass
+                        </a>
                         <button disabled class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed">
                             Devam Et
                             <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -170,6 +291,7 @@
                             <h3 class="text-sm font-medium text-red-800">Kurulum için gereksinimler karşılanmıyor</h3>
                             <div class="mt-2 text-sm text-red-700">
                                 <p>Lütfen yukarıdaki gereksinimleri karşıladıktan sonra tekrar deneyin.</p>
+                                <p class="mt-2"><strong>Plesk kullanıyorsanız:</strong> "Plesk Bypass" butonunu kullanarak devam edebilirsiniz.</p>
                             </div>
                         </div>
                     </div>
@@ -179,4 +301,3 @@
     </div>
 </body>
 </html>
-

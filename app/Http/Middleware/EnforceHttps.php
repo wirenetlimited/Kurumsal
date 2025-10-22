@@ -16,13 +16,23 @@ class EnforceHttps
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // HTTPS zorunluluğu ayarlardan kontrol et
-        $httpsRequired = Setting::get('https_required', false);
-        
         // Local environment'da HTTPS zorunlu değil
         if (app()->environment('local')) {
             return $next($request);
         }
+
+        // Skip during installation
+        if ($this->isInstalling($request)) {
+            return $next($request);
+        }
+
+        // Check if settings table exists
+        if (!\Schema::hasTable('settings')) {
+            return $next($request);
+        }
+        
+        // HTTPS zorunluluğu ayarlardan kontrol et
+        $httpsRequired = Setting::get('https_required', false);
         
         // HTTPS zorunluysa ve mevcut bağlantı HTTP ise yönlendir
         if ($httpsRequired && !$request->secure()) {
@@ -45,5 +55,16 @@ class EnforceHttps
         }
         
         return $next($request);
+    }
+
+    /**
+     * Check if we are in installation mode
+     */
+    private function isInstalling(Request $request): bool
+    {
+        $path = $request->path();
+        return str_starts_with($path, 'install') || 
+               str_starts_with($path, 'public/install') ||
+               str_contains($path, 'install');
     }
 }

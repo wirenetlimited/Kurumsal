@@ -3,19 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Gate;
-use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\Quote;
-use App\Models\Service;
 use App\Models\Setting;
-use App\Observers\InvoiceObserver;
-use App\Observers\QuoteObserver;
-use App\Observers\PaymentObserver;
-use App\Observers\ServiceObserver;
-use App\Events\PaymentCreated;
-use App\Listeners\PaymentCreatedListener;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,83 +22,48 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Türkçe locale yükle
-        \Carbon\Carbon::setLocale('tr');
-        
-        // Admin gate tanımlama
-        Gate::define('admin', function ($user) {
-            return $user->isAdmin();
-        });
-
-        // Observer'ları kaydet
-        Invoice::observe(InvoiceObserver::class);
-        Quote::observe(QuoteObserver::class);
-        Payment::observe(PaymentObserver::class);
-        Service::observe(ServiceObserver::class);
-
-        // Event listener'ları kaydet (PaymentObserver kullanıldığı için kaldırıldı)
-        // \Event::listen(PaymentCreated::class, PaymentCreatedListener::class);
-
-        // PHP header'ını gizle (güvenlik için)
-        if (function_exists('header')) {
-            header_remove('X-Powered-By');
-        }
-        
-        // Laravel'in X-Powered-By header'ını kaldır
-        if (app()->bound('response')) {
-            app('response')->headers->remove('X-Powered-By');
-        }
-
-        // Mail configuration override from database
-        $this->overrideMailConfiguration();
-        
-        // System configuration override from database
-        $this->overrideSystemConfiguration();
-        
-        // HTTPS enforcement (conditional)
-        if (config('app.env') === 'production' && config('app.force_https', false)) {
-            $this->forceHttps();
+        // Skip all settings during installation
+        if ($this->isInstalling()) {
+            return;
         }
 
         // Session hardening - dynamic timeout from settings
         try {
-            $sessionTimeout = Setting::get('session_timeout', 120);
-            config(['session.lifetime' => (int) $sessionTimeout]);
-            
-            // Security settings override
-            $secureCookies = Setting::get('secure_cookies', true);
-            $sameSitePolicy = Setting::get('same_site_policy', 'lax');
-            $httpOnlyCookies = Setting::get('http_only_cookies', true);
-            $httpsRequired = Setting::get('https_required', false);
-            
-            config([
-                'session.secure' => $secureCookies,
-                'session.same_site' => $sameSitePolicy,
-                'session.http_only' => $httpOnlyCookies,
-            ]);
-            
-            // HTTPS enforcement
-            if ($httpsRequired && !app()->environment('local')) {
-                config(['session.secure' => true]);
-            }
-            
-        } catch (\Throwable $e) {
-            // DB hazır değilse sessiz geç
-            if (app()->environment('local', 'staging')) {
-                \Log::warning('Session hardening config failed', [
-                    'error' => $e->getMessage()
+            // Check if settings table exists first
+            if (\Schema::hasTable('settings')) {
+                $sessionTimeout = Setting::get('session_timeout', 120);
+                config(['session.lifetime' => (int) $sessionTimeout]);
+                
+                // Security settings override
+                $secureCookies = Setting::get('secure_cookies', true);
+                $sameSitePolicy = Setting::get('same_site_policy', 'lax');
+                $httpOnlyCookies = Setting::get('http_only_cookies', true);
+                $httpsRequired = Setting::get('https_required', false);
+                
+                config([
+                    'session.secure' => $secureCookies,
+                    'session.same_site' => $sameSitePolicy,
+                    'session.http_only' => $httpOnlyCookies,
+                    'app.force_https' => $httpsRequired,
                 ]);
             }
+        } catch (\Throwable $e) {
+            \Log::warning('Session hardening config failed', [
+                'error' => $e->getMessage()
+            ]);
         }
 
         // Dynamic HTTPS enforcement middleware registration
         try {
-            $httpsRequired = Setting::get('https_required', false);
-            
-            if ($httpsRequired && !app()->environment('local')) {
-                // Register HTTPS enforcement middleware dynamically
-                $router = app('router');
-                $router->pushMiddlewareToGroup('web', \App\Http\Middleware\EnforceHttps::class);
+            // Check if settings table exists first
+            if (\Schema::hasTable('settings')) {
+                $httpsRequired = Setting::get('https_required', false);
+                
+                if ($httpsRequired && !app()->environment('local')) {
+                    // Register HTTPS enforcement middleware dynamically
+                    $router = app('router');
+                    $router->pushMiddlewareToGroup('web', \App\Http\Middleware\EnforceHttps::class);
+                }
             }
         } catch (\Throwable $e) {
             // DB hazır değilse sessiz geç
@@ -118,6 +73,12 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         }
+
+        // Override mail configuration from database settings
+        $this->overrideMailConfiguration();
+
+        // Override system configuration from database settings
+        $this->overrideSystemConfiguration();
     }
 
     /**
@@ -145,38 +106,34 @@ class AppServiceProvider extends ServiceProvider
             if ($mailMailer) {
                 Config::set('mail.default', $mailMailer);
             }
-
             if ($mailHost) {
                 Config::set('mail.mailers.smtp.host', $mailHost);
             }
-
             if ($mailPort) {
                 Config::set('mail.mailers.smtp.port', $mailPort);
             }
-
             if ($mailUsername) {
                 Config::set('mail.mailers.smtp.username', $mailUsername);
             }
-
             if ($mailPassword) {
                 Config::set('mail.mailers.smtp.password', $mailPassword);
             }
-
             if ($mailEncryption) {
                 Config::set('mail.mailers.smtp.encryption', $mailEncryption);
             }
-
             if ($mailFromAddress) {
                 Config::set('mail.from.address', $mailFromAddress);
             }
-
             if ($mailFromName) {
                 Config::set('mail.from.name', $mailFromName);
             }
-
-        } catch (\Exception $e) {
-            // Log error but don't break the application
-            \Log::warning('Failed to override mail configuration: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            // DB hazır değilse sessiz geç
+            if (app()->environment('local', 'staging')) {
+                \Log::warning('Mail configuration override failed', [
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
     }
 
@@ -203,55 +160,43 @@ class AppServiceProvider extends ServiceProvider
             // Override system configuration if settings exist
             if ($timezone) {
                 Config::set('app.timezone', $timezone);
-                date_default_timezone_set($timezone);
             }
-
             if ($locale) {
                 Config::set('app.locale', $locale);
-                Config::set('app.fallback_locale', $locale);
-                \Carbon\Carbon::setLocale($locale);
             }
-
             if ($dateFormat) {
                 Config::set('app.date_format', $dateFormat);
             }
-
             if ($timeFormat) {
                 Config::set('app.time_format', $timeFormat);
             }
-
             if ($maintenanceMode !== null) {
-                Config::set('app.maintenance_mode', (bool) $maintenanceMode);
+                Config::set('app.maintenance_mode', $maintenanceMode);
             }
-
             if ($cacheEnabled !== null) {
-                Config::set('cache.enabled', (bool) $cacheEnabled);
+                Config::set('cache.default', $cacheEnabled ? 'database' : 'file');
             }
-
             if ($logLevel) {
                 Config::set('logging.level', $logLevel);
             }
-
-        } catch (\Exception $e) {
-            // Log error but don't break the application
-            \Log::warning('Failed to override system configuration: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            // DB hazır değilse sessiz geç
+            if (app()->environment('local', 'staging')) {
+                \Log::warning('System configuration override failed', [
+                    'error' => $e->getMessage()
+                ]);
+            }
         }
     }
 
     /**
-     * Force HTTPS in production
+     * Check if we are in installation mode
      */
-    private function forceHttps(): void
+    private function isInstalling(): bool
     {
-        if (request()->isSecure()) {
-            return;
-        }
-
-        $url = request()->getRequestUri();
-        $secureUrl = 'https://' . request()->getHost() . $url;
-        
-        if (request()->isMethod('GET')) {
-            redirect()->secure($url)->send();
-        }
+        $path = request()->path();
+        return str_starts_with($path, 'install') || 
+               str_starts_with($path, 'public/install') ||
+               str_contains($path, 'install');
     }
 }

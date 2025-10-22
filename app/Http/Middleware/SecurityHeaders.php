@@ -23,6 +23,16 @@ class SecurityHeaders
             return $response;
         }
 
+        // Skip during installation
+        if ($this->isInstalling($request)) {
+            return $response;
+        }
+
+        // Check if settings table exists
+        if (!\Schema::hasTable('settings')) {
+            return $response;
+        }
+
         // HSTS (HTTP Strict Transport Security)
         $hstsEnabled = Setting::get('hsts_enabled', true);
         $hstsMaxAge = Setting::get('hsts_max_age', 31536000); // 1 year default
@@ -68,5 +78,16 @@ class SecurityHeaders
         $response->headers->remove('X-Powered-By');
 
         return $response;
+    }
+
+    /**
+     * Check if we are in installation mode
+     */
+    private function isInstalling(Request $request): bool
+    {
+        $path = $request->path();
+        return str_starts_with($path, 'install') || 
+               str_starts_with($path, 'public/install') ||
+               str_contains($path, 'install');
     }
 }

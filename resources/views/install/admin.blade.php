@@ -26,6 +26,17 @@
                 </div>
             </div>
 
+            <!-- Geri Dönüş Butonları -->
+            <div class="mb-6 flex justify-between">
+                <a href="{{ route('install.back-to-database') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600 transition-colors">
+                    ← Geri (Veritabanı Ayarları)
+                </a>
+                <div class="text-sm text-gray-500">
+                    Adım 4/4
+                </div>
+            </div>
+
             <!-- Admin User Creation -->
             <div class="space-y-6">
                 <h2 class="text-xl font-semibold text-gray-900">Yönetici Hesabı Oluştur</h2>

@@ -247,29 +247,18 @@ Route::prefix('install')->name('install.')->group(function () {
     Route::get('/migrate', [\App\Http\Controllers\InstallController::class, 'migrate'])->name('migrate');
     Route::get('/admin', [\App\Http\Controllers\InstallController::class, 'admin'])->name('admin');
     Route::post('/admin', [\App\Http\Controllers\InstallController::class, 'createAdmin'])->name('createAdmin');
+    
+    // Geri dönüş rotaları
+    Route::get('/back-to-index', [\App\Http\Controllers\InstallController::class, 'backToIndex'])->name('back-to-index');
+    Route::get('/back-to-database', [\App\Http\Controllers\InstallController::class, 'backToDatabase'])->name('back-to-database');
+    
+    // Kurulum sıfırlama
+    Route::get('/reset', [\App\Http\Controllers\InstallController::class, 'reset'])->name('reset');
 });
 
 // Health Check Route
 Route::get('/health', function () {
     return response('ok', 200);
 });
-
-
-
-// Test Route - Admin kontrolü
-Route::get('/test-admin', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-        return response()->json([
-            'user_id' => $user->id,
-            'user_name' => $user->name,
-            'user_email' => $user->email,
-            'is_admin' => $user->is_admin,
-            'isAdmin_method' => $user->isAdmin(),
-            'can_admin' => auth()->user()->can('admin')
-        ]);
-    }
-    return response()->json(['error' => 'Not authenticated']);
-})->middleware('auth');
 
 
